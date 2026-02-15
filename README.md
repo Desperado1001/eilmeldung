@@ -1,185 +1,156 @@
+# eilmeldung
 
+![Logo of eilmeldung](docs/images/logo.png)
 
-![Logo of eilmeldung](docs/images/logo.png) 
-  
+一个基于 Rust + Ratatui + news-flash 的高性能 TUI RSS 阅读器。
 
-![Screenshot of eilmeldung](docs/images/hero-shot.jpg) 
+- 非阻塞终端 UI，偏 Vim 的键位体验
+- 支持多 RSS Provider（依赖 `news-flash`）
+- 查询语言（过滤/搜索/批处理）
+- 强配置能力（主题、键位、面板内容、自动命令）
 
-*eilmeldung* is a *TUI RSS reader* based on the awesome [news-flash](https://gitlab.com/news-flash/news_flash) library.  
-- *fast* in every aspect: non-blocking terminal user interface, (neo)vim-inspired keybindings, instant start-up and no clutter
-- *stands* on the shoulder of *giants*: based on the news-flash library, *eilmeldung* supports many RSS providers, is efficient and reliable
-- *powerful* and yet *easy to use out-of-the-box*: sane defaults which work for most, and yet configurable to meet anyones requirements, from keybindings to colors, from displayed content to RSS provider
-- read news like a pro: filter and search news with a easy-to-learn powerful *query language*, activate *zen mode* to focus on the article content and nothing else
+## 架构总览
 
-*eilmeldung* is German for *breaking news*
+![Architecture](docs/images/architecture.svg)
 
----
+应用采用“事件驱动 + 分层模块”设计：输入事件进入消息总线，业务命令分发到 UI 子模块和新闻数据层，再统一渲染回终端。
 
-## Table of Contents
+## 项目结构
 
-- [Showreel](#showreel)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Quick Reference](#quick-reference)
-- [Documentation](#documentation)
-- [FAQ](#faq)
-- [Credits](#credits)
-- [Contributing](#contributing)
-
----
-
-# Showreel
-
-https://github.com/user-attachments/assets/ddd731dd-3fce-43c2-80fd-dafb20520873
-
-This video demonstrates
-- basic (vim-like) navigation and reading
-- *zen* mode: just show content
-- creating new tags and tagging a article
-- *filtering* and *searching* article list by using a article queries
-- *tagging* multiple articles by using an article query
-
----
-
-# Installation 
-
-**Quick install:**
-
-- **Homebrew**: `brew tap christo-auer/eilmeldung  https://github.com/christo-auer/eilmeldung && brew install eilmeldung`
-- **Arch (AUR)**: `paru -S eilmeldung` or `yay -S eilmeldung`
-- **Cargo**: `cargo install --locked --git https://github.com/christo-auer/eilmeldung` (you need to install [build dependencies](docs/installation.md) first!)
-
-**Important**: You need a [Nerd Font](https://github.com/ryanoasis/nerd-fonts) compatible font/terminal for icons to display correctly!
-
-For detailed installation instructions including Nix/Home Manager setup, see **[Installation Guide](docs/installation.md)**.
-
----
-
-# Quick Start
-
-1. **Install** eilmeldung (see above)
-2. **Run** `eilmeldung` - you'll be guided through the initial setup
-3. **Choose a provider** (select "Local" if you're new to RSS)
-4. **Add feeds** with `c f` or import an OPML file with `:importopml path/to/file.opml`
-5. **Sync** your feeds with `s`
-6. **Start reading!** Use `j`/`k` to navigate up/down, `h`/`l` to navigate between panels, `o` to open articles in the browser, `z` to enjoy "zen mode"
-
-Press `?` anytime to see all available commands!
-
-For a comprehensive getting started guide, see **[Getting Started](docs/getting-started.md)**.
-
----
-
-# Quick Reference
-
-Here some key bindings to get you started.
-
-| Key             | Action                                                        |
-| -----           | --------                                                      |
-| `?`             | Show all key bindings (search with `/`!)                      |
-| `s`             | Sync all feeds                                                |
-| `j` / `k`       | Move down / up                                                |
-| `h` / `l`       | Move between panels (left/right)                              |
-| `o`             | Open article in browser, mark as read, jump to next unread    |
-| `r` / `u`       | Mark as read / unread                                         |
-| `m` / `v`       | Mark (star) / unmark article                                  |
-| `/`             | Search articles                                               |
-| `:`             | Open command line                                             |
-| `q`             | Quit                                                          |
-| `1` / `2` / `3` | Show all/only unread/only marked in feed list or article list |
-
-**Tip:** Press `?` anytime to see all available commands, and use `/` in the help dialog to search!
-
-**Another Tip**: Navigate to the article list and use `C-j`/`C-k` to move down/up in the feed list and use `M-k`/`M-j` to scroll the article content down/up. Of course, you can remap all keys to your liking.
-
----
-
-# Documentation
-
-Complete documentation is available in the `docs/` directory:
-
-- **[Getting Started Guide](docs/getting-started.md)** - Setup and first steps
-- **[Installation Guide](docs/installation.md)** - Detailed installation instructions
-- **[Key Bindings Reference](docs/keybindings.md)** - Complete keybinding reference
-- **[Commands Reference](docs/commands.md)** - All available commands
-- **[Article Queries](docs/queries.md)** - Powerful search and filter syntax
-- **[Configuration Guide](docs/configuration.md)** - Customize appearance and behavior
-- **[Command Line Arguments](docs/cli_args.md)** - Available CLI options
-- **[FAQ](docs/faq.md)** - Frequently asked questions
-
----
-
-# FAQ
-
-### Which providers are supported?
-
-See [news_flash_gtk for all supported providers](https://gitlab.com/news-flash/news_flash_gtk). 
-
-### Does eilmeldung support smart folders?
-
-Yes! Use queries in your feed list configuration. Example:
-
-```toml
-feed_list = [
-  'query: "Important Today" #important unread today',
-  'query: "Read Later" #readlater unread',
-  "feeds",
-]
+```text
+.
+├── src/
+│   ├── main.rs                 # 启动入口：初始化、登录、任务、主循环
+│   ├── cli.rs                  # CLI 参数与命令执行
+│   ├── connectivity.rs         # 网络连通性监听
+│   ├── logging.rs              # 日志初始化
+│   ├── login.rs                # 首次登录与引导
+│   ├── newsflash_utils.rs      # news-flash 封装（数据访问/异步操作）
+│   ├── config/                 # 配置模型、主题、路径、键位等
+│   ├── input/                  # 键盘输入解析
+│   ├── messages/               # 事件/命令消息定义与解析
+│   ├── query/                  # 查询语言解析与排序
+│   └── ui/                     # UI 组件与页面状态机
+├── docs/                       # 用户文档（安装、命令、配置、FAQ）
+├── examples/                   # 默认配置与主题示例
+├── assets/                     # 静态资源
+└── .github/workflows/          # CI：fmt/clippy/test/release
 ```
 
-### Can I customize keybindings and colors?
+## 快速开始
 
-Absolutely! Everything is customizable via the [configuration file](docs/configuration.md). See `examples/default-config.toml` for all options.
+1. 安装 Rust（建议 stable）
+2. 克隆仓库并运行：
 
-### How do I save articles for later?
+```bash
+cargo run
+```
 
-Create a tag (`:tagadd readlater red`), bind it to a key, and create a query in your feed list. See the [FAQ](docs/faq.md#how-can-i-save-articles-for-reading-later) for details.
+3. 首次启动按引导完成 Provider 登录与同步
 
-### Can I hide feeds/categories/tags without unread/marked articles?
+常用命令：
 
-Yes, focus the feed list and press `2` / `3` to show only feeds/categories/tags with unread / marked articles, show all with `1`. Change the value of the configuration option `feed_list_scope` to either `all`, `unread` or `marked` to set the default value.
+```bash
+cargo build
+cargo build --release
+cargo test --all-features
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+```
 
+## 运行流程（从启动到渲染）
 
-### Can execute automatic operations after synchronisation/refresh?
+1. `main.rs` 解析 CLI、加载配置、初始化日志与错误处理。
+2. 构建 `NewsFlash` 与 HTTP client，必要时执行登录/重登。
+3. 创建 Tokio MPSC 消息通道与 `ConnectivityMonitor`。
+4. 初始化 `App`（包含 feed/article/content 等 UI 子模块）。
+5. 启动输入读取线程，将键盘事件转换为 `Message`。
+6. 进入主循环：`Message -> Command/Event -> 状态变更 -> Ratatui 渲染`。
 
-Yes, via the option `after_sync_commands` [configuration](docs/configuration.md#after-sync_commands) for some recipes.
+## 模块化拆分（现状与建议）
 
-**More questions?** See the complete [FAQ](docs/faq.md).
+### 现状分层
 
----
+- `app` 层：`main.rs`, `ui/mod.rs`（应用生命周期与状态机）
+- `domain` 层：`query/`, `messages/`, `config/`（规则、命令、配置模型）
+- `infra` 层：`newsflash_utils.rs`, `connectivity.rs`, `login.rs`（外部系统交互）
+- `presentation` 层：`ui/*/view.rs`, `ui/*/model.rs`（终端展示）
 
-# Credits
+### 建议重构为 workspace（可渐进）
 
-## Standing on the Shoulders of Giants
+```text
+crates/
+├── eilmeldung-app        # 启动、DI、生命周期
+├── eilmeldung-domain     # query/messages/config 抽象与模型
+├── eilmeldung-feed       # news-flash 适配器与同步策略
+├── eilmeldung-ui         # ratatui 组件与页面编排
+└── eilmeldung-cli        # CLI 命令和自动化任务
+```
 
-*eilmeldung* was inspired by other awesome programs and libraries:
+重构顺序建议：
+1. 先抽离 `domain`（低耦合、收益最高）。
+2. 再抽离 `feed` 适配层（隔离第三方依赖）。
+3. 最后拆 `ui`（避免一次性改动过大）。
 
-- [news-flash](https://gitlab.com/news-flash/news_flash) library and [news-flash GTK](https://gitlab.com/news-flash/news_flash_gtk), a modern Gnome/GTK RSS reader, both implemented in rust
-- [newsboat](https://newsboat.org/) which has been me TUI RSS reader of choice for many years
-- [spotify-player](https://github.com/aome510/spotify-player), a TUI spotify music player written in rust. In particular, the theming system and how input is handled has been a great inspiration for *eilmeldung*
-- [vifm](https://vifm.info/), [neomutt](https://neomutt.org/) with [notmuch](https://notmuchmail.org/) inspired the filtering and article query systems
-- [neovim](https://neovim.io/) and [vim](https://www.vim.org/) for their philosophy on user input
-- [ratatui](https://ratatui.rs/) and all its supporting libraries for creating the TUI
+## Rust 新手学习路径（7 天）
 
-## On the use of LLMs in this Project
+目标：一周内搞清楚这个项目的主干，并能独立做一个小功能改动。
 
-This project was built as an experiment in learning Rust through LLM use. LLMs were used as tutors (asking questions, not providing solutions) and for documentation, but every line of code was intentionally written to solve a problem I understood.
+### Day 1：跑通与观察
+- 运行：`cargo run`
+- 阅读：`src/main.rs`
+- 任务：画出你自己的启动流程（配置加载、登录、消息通道、主循环）。
 
-📖 Read more about the LLM development approach in [LLM Development](docs/llm-development.md).
+### Day 2：消息驱动模型
+- 阅读：`src/messages/mod.rs`, `src/messages/event.rs`, `src/messages/command/*`
+- 任务：梳理一次按键触发后的链路：`Input -> Message -> Command -> UI 更新`。
 
----
+### Day 3：输入与键位映射
+- 阅读：`src/input/mod.rs`, `src/input/key.rs`, `src/config/input_config.rs`
+- 任务：新增或修改一个键位绑定，验证行为变化。
 
-# Contributing
+### Day 4：UI 状态机与渲染
+- 阅读：`src/ui/mod.rs`, `src/ui/view.rs`, `src/ui/*/model.rs`, `src/ui/*/view.rs`
+- 任务：给列表增加一个小显示字段，或调整一个面板文案。
 
-Contributions are welcome! Please feel free to:
+### Day 5：配置系统
+- 阅读：`src/config/mod.rs` 与子模块、`examples/default-config.toml`
+- 任务：新增一个布尔配置项并接入一个 UI 行为开关。
 
-- Report bugs or request features via [GitHub Issues](https://github.com/christo-auer/eilmeldung/issues)
-- Submit pull requests
-- Improve documentation
-- Share your configuration examples
+### Day 6：查询语言与测试
+- 阅读：`src/query/parse.rs`, `src/query/sort_order.rs`
+- 任务：增加一个查询语法边界测试（优先在现有测试模块中补）。
 
----
+### Day 7：数据层与一次完整提交
+- 阅读：`src/newsflash_utils.rs`, `src/connectivity.rs`, `src/login.rs`
+- 任务：完成一个小功能 PR，提交前执行：
 
-# License
+```bash
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --all-features
+```
 
-See [LICENSE](LICENSE) file for details.
+建议每次只改一个点，保持“小步提交 + 可回滚”。
+
+## 配置与文档
+
+- 默认配置示例：`examples/default-config.toml`
+- 主题示例：`examples/light-ansi-palette.toml`
+- 详细文档：`docs/getting-started.md`, `docs/configuration.md`, `docs/commands.md`, `docs/queries.md`
+
+## 测试与质量门禁
+
+- 单元测试贴近模块实现（如 `src/query/`, `src/config/`）
+- CI 默认执行：`fmt` + `clippy` + `cargo test --all-features`
+- 提交前建议本地完整跑一次质量命令，确保与 CI 一致
+
+## 贡献建议
+
+- Commit 使用简洁祈使句，必要时加 `chore:` / `feat:` / `fix:` 前缀
+- PR 至少包含：变更动机、核心改动、测试结果
+- 涉及 UI 行为的改动请附截图或短录屏
+
+## License
+
+GPL-3.0-or-later

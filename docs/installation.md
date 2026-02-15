@@ -29,6 +29,12 @@ brew tap christo-auer/eilmeldung https://github.com/christo-auer/eilmeldung
 brew install eilmeldung
 ```
 
+If you are on macOS and compilation fails with `libxml-2.0` or SSL/toolchain errors, update Xcode Command Line Tools first:
+
+```bash
+xcode-select --install
+```
+
 ---
 
 ## Via AUR (Arch)

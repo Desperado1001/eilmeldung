@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
+  <title id="title">eilmeldung Architecture</title>
+  <desc id="desc">Layered architecture diagram showing CLI, app core, message bus, UI modules, domain modules, and infrastructure adapters.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f7fafc; }
+      .title { font: 700 30px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 16px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .layer-title { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .box-title { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .box-text { font: 400 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .layer { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 16; }
+      .box { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.6; rx: 12; }
+      .box-ui { fill: #ecfeff; }
+      .box-app { fill: #fefce8; }
+      .box-domain { fill: #f8fafc; }
+      .box-infra { fill: #eff6ff; }
+      .arrow { stroke: #475569; stroke-width: 2; fill: none; marker-end: url(#mEnd); }
+      .arrow-dashed { stroke: #64748b; stroke-width: 2; fill: none; stroke-dasharray: 8 6; marker-end: url(#mEnd); }
+      .legend { font: 400 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+    </style>
+
+    <marker id="mEnd" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1040"/>
+  <text class="title" x="40" y="54">eilmeldung Architecture</text>
+  <text class="subtitle" x="40" y="82">Event-driven TUI RSS Reader (Rust + Ratatui + news-flash)</text>
+
+  <!-- Layers -->
+  <rect class="layer" x="30" y="110" width="1540" height="130"/>
+  <text class="layer-title" x="50" y="144">Entry Layer</text>
+
+  <rect class="layer" x="30" y="260" width="1540" height="280"/>
+  <text class="layer-title" x="50" y="294">Application &amp; Presentation Layer</text>
+
+  <rect class="layer" x="30" y="560" width="1540" height="180"/>
+  <text class="layer-title" x="50" y="594">Domain Layer</text>
+
+  <rect class="layer" x="30" y="760" width="1540" height="240"/>
+  <text class="layer-title" x="50" y="794">Infrastructure Layer</text>
+
+  <!-- Entry -->
+  <rect class="box box-app" x="70" y="155" width="260" height="70"/>
+  <text class="box-title" x="90" y="182">CLI (`src/cli.rs`)</text>
+  <text class="box-text" x="90" y="202">args parsing / one-shot commands</text>
+
+  <rect class="box box-app" x="380" y="155" width="350" height="70"/>
+  <text class="box-title" x="400" y="182">Bootstrap (`src/main.rs`)</text>
+  <text class="box-text" x="400" y="202">config, login, channels, runtime, app loop</text>
+
+  <rect class="box box-app" x="780" y="155" width="230" height="70"/>
+  <text class="box-title" x="800" y="182">Logging</text>
+  <text class="box-text" x="800" y="202">`src/logging.rs`</text>
+
+  <rect class="box box-app" x="1050" y="155" width="230" height="70"/>
+  <text class="box-title" x="1070" y="182">Config Load</text>
+  <text class="box-text" x="1070" y="202">`src/config/*`</text>
+
+  <rect class="box box-app" x="1320" y="155" width="220" height="70"/>
+  <text class="box-title" x="1340" y="182">Login Setup</text>
+  <text class="box-text" x="1340" y="202">`src/login.rs`</text>
+
+  <!-- App & Presentation -->
+  <rect class="box box-app" x="70" y="315" width="290" height="95"/>
+  <text class="box-title" x="90" y="342">App State Machine</text>
+  <text class="box-text" x="90" y="362">`src/ui/mod.rs`</text>
+  <text class="box-text" x="90" y="380">FeedSelection / ArticleSelection / Content / Zen</text>
+
+  <rect class="box box-app" x="400" y="315" width="290" height="95"/>
+  <text class="box-title" x="420" y="342">Message Bus</text>
+  <text class="box-text" x="420" y="362">Tokio mpsc `Message`</text>
+  <text class="box-text" x="420" y="380">Event -> Command -> Side Effects</text>
+
+  <rect class="box box-ui" x="730" y="315" width="260" height="95"/>
+  <text class="box-title" x="750" y="342">Feed List UI</text>
+  <text class="box-text" x="750" y="362">`ui/feeds_list/*`</text>
+  <text class="box-text" x="750" y="380">selection/filter/navigation</text>
+
+  <rect class="box box-ui" x="1020" y="315" width="260" height="95"/>
+  <text class="box-title" x="1040" y="342">Article List UI</text>
+  <text class="box-text" x="1040" y="362">`ui/articles_list/*`</text>
+  <text class="box-text" x="1040" y="380">list/query/batch targets</text>
+
+  <rect class="box box-ui" x="1310" y="315" width="230" height="95"/>
+  <text class="box-title" x="1330" y="342">Article Content UI</text>
+  <text class="box-text" x="1330" y="362">`ui/article_content/*`</text>
+  <text class="box-text" x="1330" y="380">render markdown/media</text>
+
+  <rect class="box box-ui" x="70" y="430" width="290" height="90"/>
+  <text class="box-title" x="90" y="457">Input Pipeline</text>
+  <text class="box-text" x="90" y="477">`src/input/*` + crossterm events</text>
+  <text class="box-text" x="90" y="495">keybindings -> commands</text>
+
+  <rect class="box box-ui" x="400" y="430" width="290" height="90"/>
+  <text class="box-title" x="420" y="457">Command Components</text>
+  <text class="box-text" x="420" y="477">`command_input` / `command_confirm`</text>
+  <text class="box-text" x="420" y="495">`help_popup` / `tooltip` / `batch`</text>
+
+  <rect class="box box-ui" x="730" y="430" width="810" height="90"/>
+  <text class="box-title" x="750" y="457">Renderer</text>
+  <text class="box-text" x="750" y="477">`src/ui/view.rs` + Ratatui frame composition</text>
+  <text class="box-text" x="750" y="495">single render pass based on latest app state</text>
+
+  <!-- Domain -->
+  <rect class="box box-domain" x="70" y="615" width="350" height="95"/>
+  <text class="box-title" x="90" y="642">Messages / Commands</text>
+  <text class="box-text" x="90" y="662">`src/messages/*`</text>
+  <text class="box-text" x="90" y="680">typed protocol between input, app, and tasks</text>
+
+  <rect class="box box-domain" x="460" y="615" width="350" height="95"/>
+  <text class="box-title" x="480" y="642">Query Engine</text>
+  <text class="box-text" x="480" y="662">`src/query/*` parser + sort order</text>
+  <text class="box-text" x="480" y="680">feed/article filtering language</text>
+
+  <rect class="box box-domain" x="850" y="615" width="330" height="95"/>
+  <text class="box-title" x="870" y="642">Configuration Model</text>
+  <text class="box-text" x="870" y="662">`src/config/*`</text>
+  <text class="box-text" x="870" y="680">theme, keymap, startup/after-sync commands</text>
+
+  <rect class="box box-domain" x="1220" y="615" width="320" height="95"/>
+  <text class="box-title" x="1240" y="642">Shared Prelude / Utils</text>
+  <text class="box-text" x="1240" y="662">`src/prelude.rs`, `src/utils/*`</text>
+  <text class="box-text" x="1240" y="680">cross-module types and helpers</text>
+
+  <!-- Infra -->
+  <rect class="box box-infra" x="70" y="820" width="350" height="120"/>
+  <text class="box-title" x="90" y="847">News Adapter</text>
+  <text class="box-text" x="90" y="867">`src/newsflash_utils.rs`</text>
+  <text class="box-text" x="90" y="885">wraps `news-flash` API + async operation flags</text>
+  <text class="box-text" x="90" y="903">sync/read/update/tag/mark operations</text>
+
+  <rect class="box box-infra" x="460" y="820" width="300" height="120"/>
+  <text class="box-title" x="480" y="847">Connectivity Monitor</text>
+  <text class="box-text" x="480" y="867">`src/connectivity.rs`</text>
+  <text class="box-text" x="480" y="885">online/offline detection + event emission</text>
+
+  <rect class="box box-infra" x="800" y="820" width="300" height="120"/>
+  <text class="box-title" x="820" y="847">Provider SDK</text>
+  <text class="box-text" x="820" y="867">`news-flash` crate</text>
+  <text class="box-text" x="820" y="885">RSS providers, persistence, login sessions</text>
+
+  <rect class="box box-infra" x="1140" y="820" width="190" height="120"/>
+  <text class="box-title" x="1160" y="847">HTTP Client</text>
+  <text class="box-text" x="1160" y="867">`reqwest`</text>
+  <text class="box-text" x="1160" y="885">timeouts/retries</text>
+
+  <rect class="box box-infra" x="1360" y="820" width="180" height="120"/>
+  <text class="box-title" x="1380" y="847">Storage</text>
+  <text class="box-text" x="1380" y="867">state/config dirs</text>
+  <text class="box-text" x="1380" y="885">cache + local db/files</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M330 190 L380 190"/>
+  <path class="arrow" d="M730 190 L780 190"/>
+  <path class="arrow" d="M1010 190 L1050 190"/>
+  <path class="arrow" d="M1280 190 L1320 190"/>
+
+  <path class="arrow" d="M525 225 L525 315"/>
+  <path class="arrow" d="M215 410 L215 430"/>
+  <path class="arrow" d="M545 410 L545 430"/>
+  <path class="arrow" d="M860 410 L860 430"/>
+  <path class="arrow" d="M1145 410 L1145 430"/>
+  <path class="arrow" d="M1425 410 L1425 430"/>
+
+  <path class="arrow" d="M545 520 L545 615"/>
+  <path class="arrow" d="M215 520 L215 615"/>
+
+  <path class="arrow" d="M245 710 L245 820"/>
+  <path class="arrow" d="M635 710 L635 820"/>
+  <path class="arrow" d="M1015 710 L1015 820"/>
+
+  <path class="arrow" d="M420 880 L460 880"/>
+  <path class="arrow" d="M760 880 L800 880"/>
+  <path class="arrow" d="M1100 880 L1140 880"/>
+  <path class="arrow" d="M1330 880 L1360 880"/>
+
+  <path class="arrow-dashed" d="M980 880 C980 760, 820 760, 820 520"/>
+  <text class="legend" x="840" y="760">async data updates</text>
+
+  <path class="arrow-dashed" d="M215 430 C215 350, 400 350, 400 360"/>
+  <text class="legend" x="230" y="338">keyboard events</text>
+
+  <path class="arrow-dashed" d="M1540 475 C1560 475, 1560 930, 1540 930"/>
+  <text class="legend" x="1270" y="964">render + data feedback loop</text>
+</svg>

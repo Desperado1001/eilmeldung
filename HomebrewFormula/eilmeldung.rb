@@ -7,7 +7,7 @@ class Eilmeldung < Formula
   head "https://github.com/christo-auer/eilmeldung.git", branch: "main"
   version "0.9.3"
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   depends_on "libxml2"
@@ -19,6 +19,10 @@ class Eilmeldung < Formula
   end
   
   def install
+    ENV.prepend_path "PKG_CONFIG_PATH", Formula["libxml2"].opt_lib/"pkgconfig"
+    ENV.prepend_path "PKG_CONFIG_PATH", Formula["openssl@3"].opt_lib/"pkgconfig"
+    ENV.prepend_path "PKG_CONFIG_PATH", Formula["sqlite"].opt_lib/"pkgconfig"
+    ENV["XML2_CONFIG"] = Formula["libxml2"].opt_bin/"xml2-config"
     system "cargo", "install", *std_cargo_args
   end
 
